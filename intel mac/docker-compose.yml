@@ -1,0 +1,48 @@
+services:
+  db:
+    # We use a mariadb image which supports both amd64 & arm64 architecture
+    image: mariadb
+    # If you really want to use MySQL, uncomment the following line
+    #image: mysql:8.0.27
+    command: '--default-authentication-plugin=mysql_native_password'
+    volumes:
+      - ./db_data:/var/lib/mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=somewordpress
+      - MYSQL_DATABASE=wordpress
+      - MYSQL_USER=wordpress
+      - MYSQL_PASSWORD=wordpress
+    #networks:
+    #  - database_network
+    expose:
+      - 3306
+      - 33060
+
+  wordpress:
+    image: wordpress:latest
+    volumes:
+      - ./wp_data:/var/www/html
+    ports:
+      - 80:80
+    #networks:
+    #  - database_network
+    restart: always
+    environment:
+      - VIRTUAL_HOST=portfolio.ctwhome.com # Enviroment variable needed for wordpress proxy
+      - LETSENCRYPT_HOST=portfolio.ctwhome.com # Enviroment variables needed for Let's Encrypt companion
+      - LETSENCRYPT_EMAIL=ctw@ctwhome.com
+
+      - WORDPRESS_DB_HOST=db
+      - WORDPRESS_DB_USER=wordpress
+      - WORDPRESS_DB_PASSWORD=wordpress
+      - WORDPRESS_DB_NAME=wordpress
+
+volumes:
+  db_data:
+  wp_data:
+    # Name of our shared network that containers will use
+
+#networks:
+#  database_network:
+#    internal: true
